@@ -1,0 +1,1 @@
+export {default as messageRputer} from "./message.controller.js"
