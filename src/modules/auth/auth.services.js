@@ -4,7 +4,8 @@ import { BadRequestException, ConflictException, NotFoundException, Unauthorized
 import sucessResponse from "../../utils/response/sucess.response.js"
 import { decrypt, encrypt } from "../../utils/security/encrypt.js"
 import { compareHash, generateHash } from "../../utils/security/hash.security.js"
-
+import { OAuth2Client } from 'google-auth-library';
+import { createLoginCredentials } from "../../utils/security/token.js"
 export const signUp = async (req , res)=>{
     const {email} = req.body
 
@@ -35,6 +36,50 @@ export const signIn = async (req , res)=>{
     }
     const userData = user.toObject();
     userData.phone = decrypt(user.phone)
-   return sucessResponse({res , data : userData })
+    const tokens = await createLoginCredentials({user})
+   return sucessResponse({res , data : tokens })
 
 }
+
+async function verifyGoogleAccount({ idToken }) {
+  const client = new OAuth2Client();
+
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+
+  return payload;
+}
+export const loginWithGmail = async (req, res) => {
+  const { idToken } = req.body;
+
+  const { email, picture, given_name, family_name, email_verified } = await verifyGoogleAccount({ idToken });
+
+  if (!email_verified) {
+    throw BadRequestException({ message: "Email not verified" });
+  }
+
+  const user = await dbService.findOne({ model: UserModel, filter: { email } });
+
+  if (user) {
+    if (user.provider === ProviderEnum.GOOGLE) {
+      const tokens = await getNewLoginCredentials(user);
+      sucessResponse({ res, message: "Done", data: { tokens } });
+    }
+  } else {
+    const newUser = await dbService.create({
+      model: userModel,
+      data: [{
+        firstName: given_name,
+        lastName: family_name,
+        email,
+        profilePic: picture,
+        provider: ProviderEnum.GOOGLE
+      }]
+    });
+    const tokens = await getNewLoginCredentials(newUser);
+    sucessResponse({ res, message: "Done", statusCode: 201, data: { tokens } });
+  }
+};
