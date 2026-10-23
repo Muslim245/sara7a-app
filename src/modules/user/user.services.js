@@ -12,3 +12,7 @@ export const refrshToken = async (req, res, next) => {
     data: tokens,
   });
 };
+
+export const uploadFile = async (req, res) => {
+ await sucessResponse({ res, message: "Done", data: { user: req.user } });
+};

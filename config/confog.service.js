@@ -18,3 +18,5 @@ export const Access_Admin_Token_signature = process.env.Access_Admin_Token_signa
 export const Refresh_Admin_Token_signature = process.env.Refresh_Admin_Token_signature
 export const Expisers_IN_Access_Token = process.env.Expisers_IN_Access_Token
 export const Expisers_IN_Refresh_Token = process.env.Expisers_IN_Refresh_Token
+export const user_Email = process.env.user_Email
+export const user_Password = process.env.user_Password

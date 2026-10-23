@@ -53,13 +53,12 @@ const userSchema = new mongoose.Schema(
         enum : Object.values(RoleEnum),
         default : RoleEnum.ADMIN
     },
-    isConfirmed: {
-        type: Boolean,
-        default: false,
-    },
+    confirmEmail : Date ,
+    confirmEmailOtp : String ,
     profielImage: String,
+    forgetPasswordOtp : String
   },
-  {
+ {
     timestamps: true,
     toJSON: { virtuals: true },
     toObject: { virtuals: true },
